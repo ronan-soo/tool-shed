@@ -41,7 +41,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/crypto" className="flex">
+        <Link href="/cryptography" className="flex">
           <Card className="hover:border-primary hover:shadow-lg transition-all w-full flex flex-col">
             <CardHeader>
               <div className="flex items-center gap-4">

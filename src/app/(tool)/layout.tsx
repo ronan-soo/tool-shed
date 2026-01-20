@@ -29,13 +29,13 @@ const navItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/pipelines', label: 'String Pipelines', icon: Cable },
   {
-    href: '/crypto',
+    href: '/cryptography',
     label: 'Cryptography',
     icon: Shield,
     subItems: [
-      { href: '/crypto/encrypt-decrypt', label: 'Encrypt / Decrypt' },
-      { href: '/crypto/hasher', label: 'SHA-256 Hasher' },
-      { href: '/crypto/key-generator', label: 'Key Generator' },
+      { href: '/cryptography/encrypt-decrypt', label: 'Encrypt / Decrypt' },
+      { href: '/cryptography/hasher', label: 'SHA-256 Hasher' },
+      { href: '/cryptography/key-generator', label: 'Key Generator' },
     ],
   },
 ];
@@ -51,8 +51,8 @@ export default function MainLayout({
     if (pathname.startsWith('/pipelines')) {
       return 'String Pipelines';
     }
-    if (pathname.startsWith('/crypto')) {
-      const cryptoItem = navItems.find((item) => item.href === '/crypto');
+    if (pathname.startsWith('/cryptography')) {
+      const cryptoItem = navItems.find((item) => item.href === '/cryptography');
       const subItem = cryptoItem?.subItems?.find(
         (sub) => pathname === sub.href
       );
