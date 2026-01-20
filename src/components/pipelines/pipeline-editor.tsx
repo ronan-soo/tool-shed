@@ -18,7 +18,7 @@ import {
 } from '@/lib/pipeline';
 import { PipelineBlock } from './pipeline-block';
 import {
-  Case,
+  CaseSensitive,
   CodeXml,
   Braces,
   Milestone,
@@ -30,7 +30,7 @@ import {
 
 const blockTypes: { type: BlockType; name: string; icon: React.ElementType }[] =
   [
-    { type: 'case', name: 'Case Transform', icon: Case },
+    { type: 'case', name: 'Case Transform', icon: CaseSensitive },
     { type: 'escape', name: 'Escape/Unescape', icon: Link },
     { type: 'minify', name: 'Minify', icon: Sigma },
     { type: 'json_parse', name: 'Parse JSON', icon: Braces },

@@ -82,8 +82,8 @@ function formatXml(xml: string, options: any) {
       return;
     }
 
-    if (trimmedNode.match(/<\w[^>]*>.*<\/\w>/)) {
-      // Node has open and closing tags on the same line, like <tag>text</tag>
+    if (trimmedNode.match(/<\w[^>]*>[^<>]*<\/\w>/)) {
+      // Node has open and closing tags on the same line with only text content
       shouldIndent = false;
     } else if (trimmedNode.match(/^<\/\w/)) {
       // Node is a closing tag

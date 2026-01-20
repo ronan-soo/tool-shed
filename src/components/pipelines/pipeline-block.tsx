@@ -14,7 +14,7 @@ import {
   ArrowUp,
   ArrowDown,
   Trash2,
-  Case,
+  CaseSensitive,
   CodeXml,
   Braces,
   Milestone,
@@ -36,7 +36,7 @@ const blockMeta: Record<
   BlockType,
   { name: string; icon: React.ElementType }
 > = {
-  case: { name: 'Case Transform', icon: Case },
+  case: { name: 'Case Transform', icon: CaseSensitive },
   escape: { name: 'Escape/Unescape', icon: Link },
   minify: { name: 'Minify', icon: Sigma },
   json_parse: { name: 'Parse JSON', icon: Braces },
