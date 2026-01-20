@@ -160,8 +160,8 @@ function RandomKeyGenerator() {
       <CardHeader>
         <CardTitle className="font-headline">Random Key Generator</CardTitle>
         <CardDescription>
-          Generate a cryptographically secure random key in Base64 format.
-          Useful for creating new secrets.
+          Generate a cryptographically secure random key in Base64 format. This
+          is different from a secret phrase.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -228,7 +228,7 @@ export function CryptoTool() {
 
   const handleProcess = async () => {
     if (!inputText || !secret) {
-      setError('Please provide both input text and a secret key.');
+      setError('Please provide both input text and a secret phrase.');
       return;
     }
     setError('');
@@ -284,13 +284,13 @@ export function CryptoTool() {
         </TabsList>
         <TabContent
           title="Encrypt Text"
-          description="Provide text and a secret to generate an encrypted string."
+          description="Provide text and a secret phrase to generate an encrypted string."
           value="encrypt"
           buttonText="Encrypt"
         />
         <TabContent
           title="Decrypt Text"
-          description="Provide an encrypted string and the original secret to reveal the original text."
+          description="Provide an encrypted string and the original secret phrase to reveal the original text."
           value="decrypt"
           buttonText="Decrypt"
         />
@@ -332,17 +332,17 @@ export function CryptoTool() {
               />
             </div>
             <div className="grid w-full gap-2">
-              <Label htmlFor={`secret-${value}`}>Secret Key (Base64)</Label>
+              <Label htmlFor={`secret-${value}`}>Secret Phrase</Label>
               <Input
                 id={`secret-${value}`}
-                type="text"
-                placeholder="Enter your Base64 encoded secret key..."
+                type="password"
+                placeholder="Enter your secret phrase..."
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
               />
               <p className="text-sm text-muted-foreground">
-                The secret key must be a Base64 encoded string representing 128,
-                192, or 256 bits of data. Use the generator below to create one.
+                This secret is used to derive the encryption key. Make sure to
+                remember it!
               </p>
             </div>
             {error && (

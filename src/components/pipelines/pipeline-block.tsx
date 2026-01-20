@@ -31,6 +31,7 @@ import { ParseXmlBlock } from './blocks/parse-xml-block';
 import { SelectFieldBlock } from './blocks/select-field-block';
 import { StringifyBlock } from './blocks/stringify-block';
 import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
 
 const blockMeta: Record<
   BlockType,
@@ -47,6 +48,7 @@ const blockMeta: Record<
 
 type PipelineBlockProps = {
   block: Block;
+  index: number;
   onBlockChange: (block: Block) => void;
   onRemove: (id: string) => void;
   onMove: (id: string, direction: 'up' | 'down') => void;
@@ -56,6 +58,7 @@ type PipelineBlockProps = {
 
 export function PipelineBlock({
   block,
+  index,
   onBlockChange,
   onRemove,
   onMove,
@@ -125,13 +128,22 @@ export function PipelineBlock({
 
   return (
     <Card className={!block.enabled ? 'bg-muted/50' : ''}>
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
-        <div className="flex items-center gap-3">
-          <Icon className="h-6 w-6" />
-          <CardTitle className="font-headline text-lg">{name}</CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between gap-4 pb-4">
+        <div className="flex items-start gap-4">
+          <div className="bg-primary/10 text-primary p-3 rounded-lg">
+            <Icon className="h-6 w-6" />
+          </div>
+          <div>
+            <CardTitle className="font-headline text-lg">{name}</CardTitle>
+            <CardDescription>Step {index + 1} in the pipeline.</CardDescription>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Switch checked={block.enabled} onCheckedChange={handleToggle} />
+        <div className="flex items-center gap-1">
+          <Switch
+            checked={block.enabled}
+            onCheckedChange={handleToggle}
+            aria-label="Toggle block"
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -162,18 +174,28 @@ export function PipelineBlock({
         </div>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
-        {renderBlockOptions()}
+        <div className="p-4 bg-muted/30 rounded-lg">{renderBlockOptions()}</div>
         {block.error && (
-          <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            <span>{block.error}</span>
+          <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-semibold">Execution Error</p>
+              <p>{block.error}</p>
+            </div>
           </div>
         )}
         {block.output !== undefined && !block.error && (
-            <div>
-                 <CardDescription className="mb-2 text-xs uppercase font-semibold">Output Preview</CardDescription>
-                 <Textarea value={outputPreview} readOnly rows={2} className="font-code text-xs h-auto bg-muted/30" />
-            </div>
+          <div className="space-y-2 pt-2">
+            <Label className="text-xs font-semibold uppercase text-muted-foreground">
+              Output Preview
+            </Label>
+            <Textarea
+              value={outputPreview}
+              readOnly
+              rows={3}
+              className="font-code text-xs h-auto bg-muted/30 border-dashed"
+            />
+          </div>
         )}
       </CardContent>
     </Card>
