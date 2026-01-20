@@ -26,9 +26,165 @@ import {
 } from '@/lib/crypto-helpers';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-type Tab = 'encrypt' | 'decrypt';
+type EncryptDecryptTab = 'encrypt' | 'decrypt';
 
-function SecretHasher() {
+// --- Encrypt/Decrypt Tool ---
+
+export function EncryptDecryptTool() {
+  const [activeTab, setActiveTab] = useState<EncryptDecryptTab>('encrypt');
+  const [inputText, setInputText] = useState('');
+  const [secret, setSecret] = useState('');
+  const [outputText, setOutputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { toast } = useToast();
+
+  const handleProcess = async () => {
+    if (!inputText || !secret) {
+      setError('Please provide both input text and a secret phrase.');
+      return;
+    }
+    setError('');
+    setIsLoading(true);
+    setOutputText('');
+
+    try {
+      if (activeTab === 'encrypt') {
+        const encrypted = await encryptText(inputText, secret);
+        setOutputText(encrypted);
+      } else {
+        const decrypted = await decryptText(inputText, secret);
+        setOutputText(decrypted);
+      }
+    } catch (e) {
+      let errorMessage = 'An unknown error occurred.';
+      if (e instanceof CryptoError) {
+        errorMessage = e.message;
+      } else if (e instanceof Error) {
+        errorMessage =
+          'Decryption failed. This could be due to an incorrect secret or corrupted data.';
+      }
+      setError(errorMessage);
+      toast({
+        variant: 'destructive',
+        title: 'Processing Error',
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as EncryptDecryptTab);
+    setInputText('');
+    setOutputText('');
+    setError('');
+    setSecret('');
+  };
+
+  function EncryptDecryptTabContent({
+    value,
+    title,
+    description,
+    buttonText,
+  }: {
+    value: EncryptDecryptTab;
+    title: string;
+    description: string;
+    buttonText: string;
+  }) {
+    return (
+      <TabsContent value={value} className="mt-0 flex-1">
+        <Card className="flex h-full w-full flex-col">
+          <CardHeader>
+            <CardTitle className="font-headline">{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col gap-6">
+            <div className="flex flex-1 flex-col gap-2">
+              <Label htmlFor={`input-${value}`}>
+                {value === 'encrypt' ? 'Plain Text' : 'Encrypted Text'}
+              </Label>
+              <Textarea
+                id={`input-${value}`}
+                placeholder="Enter text here..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                className="font-code flex-1"
+              />
+            </div>
+            <div className="grid w-full gap-2">
+              <Label htmlFor={`secret-${value}`}>Secret Phrase</Label>
+              <Input
+                id={`secret-${value}`}
+                type="password"
+                placeholder="Enter your secret phrase..."
+                value={secret}
+                onChange={(e) => setSecret(e.target.value)}
+              />
+              <p className="text-sm text-muted-foreground">
+                This secret is used to derive the encryption key. Make sure to
+                remember it!
+              </p>
+            </div>
+            {error && (
+              <Alert variant="destructive">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="flex flex-1 flex-col gap-2">
+              <Label htmlFor={`output-${value}`}>Result</Label>
+              <Textarea
+                id={`output-${value}`}
+                placeholder="Result will appear here..."
+                value={outputText}
+                readOnly
+                className="font-code flex-1 bg-muted/50"
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleProcess} disabled={isLoading}>
+              {isLoading ? 'Processing...' : buttonText}
+            </Button>
+          </CardFooter>
+        </Card>
+      </TabsContent>
+    );
+  }
+
+  return (
+    <Tabs
+      value={activeTab}
+      onValueChange={handleTabChange}
+      className="flex flex-1 flex-col"
+    >
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="encrypt">Encrypt</TabsTrigger>
+        <TabsTrigger value="decrypt">Decrypt</TabsTrigger>
+      </TabsList>
+      <EncryptDecryptTabContent
+        title="Encrypt Text"
+        description="Provide text and a secret phrase to generate an encrypted string using AES-GCM."
+        value="encrypt"
+        buttonText="Encrypt"
+      />
+      <EncryptDecryptTabContent
+        title="Decrypt Text"
+        description="Provide an encrypted string and the original secret phrase to reveal the original text."
+        value="decrypt"
+        buttonText="Decrypt"
+      />
+    </Tabs>
+  );
+}
+
+// --- Hasher Tool ---
+
+export function HasherTool() {
   const [secretToHash, setSecretToHash] = useState('');
   const [hashedOutput, setHashedOutput] = useState('');
   const { toast } = useToast();
@@ -123,7 +279,9 @@ function SecretHasher() {
   );
 }
 
-function RandomKeyGenerator() {
+// --- Key Generator Tool ---
+
+export function KeyGeneratorTool() {
   const [bits, setBits] = useState('256');
   const [generatedKey, setGeneratedKey] = useState('');
   const { toast } = useToast();
@@ -215,161 +373,4 @@ function RandomKeyGenerator() {
       </CardFooter>
     </Card>
   );
-}
-
-export function CryptoTool() {
-  const [activeTab, setActiveTab] = useState<Tab>('encrypt');
-  const [inputText, setInputText] = useState('');
-  const [secret, setSecret] = useState('');
-  const [outputText, setOutputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { toast } = useToast();
-
-  const handleProcess = async () => {
-    if (!inputText || !secret) {
-      setError('Please provide both input text and a secret phrase.');
-      return;
-    }
-    setError('');
-    setIsLoading(true);
-    setOutputText('');
-
-    try {
-      if (activeTab === 'encrypt') {
-        const encrypted = await encryptText(inputText, secret);
-        setOutputText(encrypted);
-      } else {
-        const decrypted = await decryptText(inputText, secret);
-        setOutputText(decrypted);
-      }
-    } catch (e) {
-      let errorMessage = 'An unknown error occurred.';
-      if (e instanceof CryptoError) {
-        errorMessage = e.message;
-      } else if (e instanceof Error) {
-        errorMessage =
-          'Decryption failed. This could be due to an incorrect secret or corrupted data.';
-      }
-      setError(errorMessage);
-      toast({
-        variant: 'destructive',
-        title: 'Processing Error',
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value as Tab);
-    // Clear fields on tab switch for better UX
-    setInputText('');
-    setOutputText('');
-    setError('');
-    setSecret('');
-  };
-
-  return (
-    <div className="flex h-full flex-col gap-8">
-      <Tabs
-        value={activeTab}
-        onValueChange={handleTabChange}
-        className="flex flex-1 flex-col"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="encrypt">Encrypt</TabsTrigger>
-          <TabsTrigger value="decrypt">Decrypt</TabsTrigger>
-        </TabsList>
-        <TabContent
-          title="Encrypt Text"
-          description="Provide text and a secret phrase to generate an encrypted string."
-          value="encrypt"
-          buttonText="Encrypt"
-        />
-        <TabContent
-          title="Decrypt Text"
-          description="Provide an encrypted string and the original secret phrase to reveal the original text."
-          value="decrypt"
-          buttonText="Decrypt"
-        />
-      </Tabs>
-      <SecretHasher />
-      <RandomKeyGenerator />
-    </div>
-  );
-
-  function TabContent({
-    value,
-    title,
-    description,
-    buttonText,
-  }: {
-    value: Tab;
-    title: string;
-    description: string;
-    buttonText: string;
-  }) {
-    return (
-      <TabsContent value={value} className="mt-6 flex-1">
-        <Card className="flex h-full w-full flex-col">
-          <CardHeader>
-            <CardTitle className="font-headline">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-6">
-            <div className="flex flex-1 flex-col gap-2">
-              <Label htmlFor={`input-${value}`}>
-                {value === 'encrypt' ? 'Plain Text' : 'Encrypted Text'}
-              </Label>
-              <Textarea
-                id={`input-${value}`}
-                placeholder="Enter text here..."
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                className="font-code flex-1"
-              />
-            </div>
-            <div className="grid w-full gap-2">
-              <Label htmlFor={`secret-${value}`}>Secret Phrase</Label>
-              <Input
-                id={`secret-${value}`}
-                type="password"
-                placeholder="Enter your secret phrase..."
-                value={secret}
-                onChange={(e) => setSecret(e.target.value)}
-              />
-              <p className="text-sm text-muted-foreground">
-                This secret is used to derive the encryption key. Make sure to
-                remember it!
-              </p>
-            </div>
-            {error && (
-              <Alert variant="destructive">
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <div className="flex flex-1 flex-col gap-2">
-              <Label htmlFor={`output-${value}`}>Result</Label>
-              <Textarea
-                id={`output-${value}`}
-                placeholder="Result will appear here..."
-                value={outputText}
-                readOnly
-                className="font-code flex-1 bg-muted/50"
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button onClick={handleProcess} disabled={isLoading}>
-              {isLoading ? 'Processing...' : buttonText}
-            </Button>
-          </CardFooter>
-        </Card>
-      </TabsContent>
-    );
-  }
 }

@@ -31,15 +31,23 @@ export default function MainLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
-    switch (pathname) {
-      case '/pipelines':
-        return 'String Pipelines';
-      case '/crypto':
-        return 'Cryptography';
-      case '/':
-      default:
-        return 'Home';
+    if (pathname.startsWith('/pipelines')) {
+      return 'String Pipelines';
     }
+    if (pathname.startsWith('/crypto')) {
+      return 'Cryptography';
+    }
+    if (pathname === '/') {
+      return 'Home';
+    }
+    return 'Tool Shed';
+  };
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(href);
   };
 
   return (
@@ -69,7 +77,7 @@ export default function MainLayout({
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={pathname === item.href}
+                    isActive={isActive(item.href)}
                     tooltip={item.label}
                   >
                     <Link href={item.href}>
