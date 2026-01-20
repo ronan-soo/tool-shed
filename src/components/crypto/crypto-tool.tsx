@@ -16,14 +16,108 @@ import {
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Terminal } from 'lucide-react';
+import { Terminal, Copy } from 'lucide-react';
 import {
   encryptText,
   decryptText,
   CryptoError,
+  arrayBufferToBase64,
 } from '@/lib/crypto-helpers';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 type Tab = 'encrypt' | 'decrypt';
+
+function RandomKeyGenerator() {
+  const [bits, setBits] = useState('256');
+  const [generatedKey, setGeneratedKey] = useState('');
+  const { toast } = useToast();
+
+  const generateRandomKey = () => {
+    if (typeof window === 'undefined') {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Web Crypto API is not available.',
+      });
+      return;
+    }
+    const byteLength = parseInt(bits, 10) / 8;
+    const randomBytes = window.crypto.getRandomValues(new Uint8Array(byteLength));
+    const base64Key = arrayBufferToBase64(randomBytes.buffer);
+    setGeneratedKey(base64Key);
+  };
+
+  const copyToClipboard = () => {
+    if (generatedKey) {
+      navigator.clipboard.writeText(generatedKey);
+      toast({
+        title: 'Copied!',
+        description: 'The key has been copied to your clipboard.',
+      });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-headline">Random Key Generator</CardTitle>
+        <CardDescription>
+          Generate a cryptographically secure random key in Base64 format.
+          Useful for creating new secrets.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Label>Key Size</Label>
+          <RadioGroup
+            value={bits}
+            onValueChange={setBits}
+            className="flex items-center space-x-4 pt-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="128" id="r1" />
+              <Label htmlFor="r1">128-bit</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="192" id="r2" />
+              <Label htmlFor="r2">192-bit</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="256" id="r3" />
+              <Label htmlFor="r3">256-bit</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        {generatedKey && (
+          <div className="grid w-full gap-2">
+            <Label htmlFor="generated-key">Generated Key (Base64)</Label>
+            <div className="relative">
+              <Input
+                id="generated-key"
+                readOnly
+                value={generatedKey}
+                className="font-code pr-10"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                onClick={copyToClipboard}
+                aria-label="Copy key"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter>
+        <Button onClick={generateRandomKey}>Generate Key</Button>
+      </CardFooter>
+    </Card>
+  );
+}
 
 export function CryptoTool() {
   const [activeTab, setActiveTab] = useState<Tab>('encrypt');
@@ -80,24 +174,27 @@ export function CryptoTool() {
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange}>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="encrypt">Encrypt</TabsTrigger>
-        <TabsTrigger value="decrypt">Decrypt</TabsTrigger>
-      </TabsList>
-      <TabContent
-        title="Encrypt Text"
-        description="Provide text and a secret to generate an encrypted string."
-        value="encrypt"
-        buttonText="Encrypt"
-      />
-      <TabContent
-        title="Decrypt Text"
-        description="Provide an encrypted string and the original secret to reveal the original text."
-        value="decrypt"
-        buttonText="Decrypt"
-      />
-    </Tabs>
+    <div className="space-y-8">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="encrypt">Encrypt</TabsTrigger>
+          <TabsTrigger value="decrypt">Decrypt</TabsTrigger>
+        </TabsList>
+        <TabContent
+          title="Encrypt Text"
+          description="Provide text and a secret to generate an encrypted string."
+          value="encrypt"
+          buttonText="Encrypt"
+        />
+        <TabContent
+          title="Decrypt Text"
+          description="Provide an encrypted string and the original secret to reveal the original text."
+          value="decrypt"
+          buttonText="Decrypt"
+        />
+      </Tabs>
+      <RandomKeyGenerator />
+    </div>
   );
 
   function TabContent({

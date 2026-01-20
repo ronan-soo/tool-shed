@@ -13,7 +13,7 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 
 // Base64 helpers
-const base64ToArrayBuffer = (base64: string) => {
+export const base64ToArrayBuffer = (base64: string) => {
   const binaryString = atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
@@ -23,7 +23,7 @@ const base64ToArrayBuffer = (base64: string) => {
   return bytes.buffer;
 };
 
-const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+export const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
   let binary = '';
   const bytes = new Uint8Array(buffer);
   const len = bytes.byteLength;
