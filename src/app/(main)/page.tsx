@@ -13,7 +13,7 @@ export default function HomePage() {
     <div>
       <div className="mb-8">
         <h1 className="text-4xl font-bold font-headline tracking-tight">
-          Welcome to ToolShed
+          Welcome to Tool Shed
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
           Your one-stop collection of handy developer utilities. Select a tool
@@ -49,7 +49,7 @@ export default function HomePage() {
                   <Shield className="h-8 w-8 text-accent-foreground" />
                 </div>
                 <CardTitle className="font-headline text-xl">
-                  AES Encryption
+                  Encryption/Decryption
                 </CardTitle>
               </div>
             </CardHeader>

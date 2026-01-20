@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'ToolShed',
+  title: 'Tool Shed',
   description: 'A collection of useful developer tools.',
 };
 

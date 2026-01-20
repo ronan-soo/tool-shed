@@ -19,8 +19,8 @@ import React from 'react';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
-  { href: '/pipelines', label: 'Pipelines', icon: Cable },
-  { href: '/crypto', label: 'Crypto', icon: Shield },
+  { href: '/pipelines', label: 'String Pipelines', icon: Cable },
+  { href: '/crypto', label: 'Encryption/Decryption', icon: Shield },
 ];
 
 export default function MainLayout({
@@ -35,7 +35,7 @@ export default function MainLayout({
       case '/pipelines':
         return 'String Pipelines';
       case '/crypto':
-        return 'AES Encryption';
+        return 'Encryption/Decryption';
       case '/':
       default:
         return 'Home';
@@ -50,12 +50,12 @@ export default function MainLayout({
             <Link
               href="/"
               className="flex items-center gap-3"
-              aria-label="ToolShed Home"
+              aria-label="Tool Shed Home"
             >
               <Wrench className="h-8 w-8 text-primary" />
               <div className="flex flex-col">
                 <h2 className="font-headline text-lg font-semibold">
-                  ToolShed
+                  Tool Shed
                 </h2>
                 <p className="text-xs text-muted-foreground">
                   Developer Utilities
@@ -84,7 +84,7 @@ export default function MainLayout({
         </Sidebar>
         <SidebarInset>
           <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-            <SidebarTrigger className="md:hidden" />
+            <SidebarTrigger />
             <h1 className="text-lg font-semibold md:text-xl font-headline">
               {getPageTitle()}
             </h1>
