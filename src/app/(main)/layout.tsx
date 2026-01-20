@@ -20,7 +20,7 @@ import React from 'react';
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/pipelines', label: 'String Pipelines', icon: Cable },
-  { href: '/crypto', label: 'Encryption/Decryption', icon: Shield },
+  { href: '/crypto', label: 'Cryptography', icon: Shield },
 ];
 
 export default function MainLayout({
@@ -35,7 +35,7 @@ export default function MainLayout({
       case '/pipelines':
         return 'String Pipelines';
       case '/crypto':
-        return 'Encryption/Decryption';
+        return 'Cryptography';
       case '/':
       default:
         return 'Home';

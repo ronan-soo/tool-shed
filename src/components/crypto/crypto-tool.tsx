@@ -174,8 +174,12 @@ export function CryptoTool() {
   };
 
   return (
-    <div className="space-y-8">
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+    <div className="flex h-full flex-col gap-8">
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="flex flex-1 flex-col"
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="encrypt">Encrypt</TabsTrigger>
           <TabsTrigger value="decrypt">Decrypt</TabsTrigger>
@@ -209,8 +213,8 @@ export function CryptoTool() {
     buttonText: string;
   }) {
     return (
-      <TabsContent value={value} className="mt-6">
-        <Card>
+      <TabsContent value={value} className="mt-6 flex-1">
+        <Card className="flex h-full w-full flex-col">
           <CardHeader>
             <CardTitle className="font-headline">{title}</CardTitle>
             <CardDescription>
@@ -218,8 +222,8 @@ export function CryptoTool() {
               compatible with the .NET implementation.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid w-full gap-2">
+          <CardContent className="flex flex-1 flex-col gap-6">
+            <div className="flex flex-1 flex-col gap-2">
               <Label htmlFor={`input-${value}`}>
                 {value === 'encrypt' ? 'Plain Text' : 'Encrypted Text'}
               </Label>
@@ -228,8 +232,7 @@ export function CryptoTool() {
                 placeholder="Enter text here..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                rows={6}
-                className="font-code"
+                className="font-code flex-1"
               />
             </div>
             <div className="grid w-full gap-2">
@@ -252,15 +255,14 @@ export function CryptoTool() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <div className="grid w-full gap-2">
+            <div className="flex flex-1 flex-col gap-2">
               <Label htmlFor={`output-${value}`}>Result</Label>
               <Textarea
                 id={`output-${value}`}
                 placeholder="Result will appear here..."
                 value={outputText}
                 readOnly
-                rows={6}
-                className="font-code bg-muted/50"
+                className="font-code flex-1 bg-muted/50"
               />
             </div>
           </CardContent>
