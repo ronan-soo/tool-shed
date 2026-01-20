@@ -33,8 +33,8 @@ const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
   return btoa(binary);
 };
 
-// Key derivation function
-const getKey = async (secret: string, salt: Uint8Array): Promise<CryptoKey> => {
+// Import key from base64 secret
+const getSecretKey = async (secret: string): Promise<CryptoKey> => {
   if (typeof window === 'undefined') {
     throw new CryptoError('Web Crypto API is not available.');
   }
@@ -46,29 +46,23 @@ const getKey = async (secret: string, salt: Uint8Array): Promise<CryptoKey> => {
     throw new CryptoError('Secret key is not a valid Base64 string.');
   }
 
-  const secretKey = await window.crypto.subtle.importKey(
+  // The .NET implementation uses a 256-bit key.
+  if (secretRaw.byteLength !== 32) {
+    throw new CryptoError(
+      'Secret key must be 32 bytes (256 bits) when Base64 decoded.'
+    );
+  }
+
+  return window.crypto.subtle.importKey(
     'raw',
     secretRaw,
-    'PBKDF2',
-    false,
-    ['deriveKey']
-  );
-
-  return window.crypto.subtle.deriveKey(
-    {
-      name: 'PBKDF2',
-      salt: salt,
-      iterations: 100000,
-      hash: 'SHA-256',
-    },
-    secretKey,
-    { name: 'AES-GCM', length: 256 },
-    true,
+    { name: 'AES-CBC', length: 256 },
+    false, // not extractable
     ['encrypt', 'decrypt']
   );
 };
 
-// Encrypt function
+// Encrypt function using AES-CBC
 export const encryptText = async (
   text: string,
   secret: string
@@ -79,28 +73,28 @@ export const encryptText = async (
   if (!text) throw new CryptoError('Input text cannot be empty.');
   if (!secret) throw new CryptoError('Secret key cannot be empty.');
 
-  const salt = window.crypto.getRandomValues(new Uint8Array(16));
-  const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  const key = await getKey(secret, salt);
+  const key = await getSecretKey(secret);
+  const iv = window.crypto.getRandomValues(new Uint8Array(16)); // 128-bit IV for AES-CBC
   const plaintext = enc.encode(text);
 
   const ciphertext = await window.crypto.subtle.encrypt(
     {
-      name: 'AES-GCM',
+      name: 'AES-CBC',
       iv: iv,
     },
     key,
     plaintext
   );
 
-  const saltB64 = arrayBufferToBase64(salt);
   const ivB64 = arrayBufferToBase64(iv);
   const cipherB64 = arrayBufferToBase64(ciphertext);
 
-  return `${saltB64}:${ivB64}:${cipherB64}`;
+  // We store the IV and ciphertext together, separated by a colon.
+  // This is a common and reliable method.
+  return `${ivB64}:${cipherB64}`;
 };
 
-// Decrypt function
+// Decrypt function using AES-CBC
 export const decryptText = async (
   encryptedData: string,
   secret: string
@@ -112,21 +106,24 @@ export const decryptText = async (
   if (!secret) throw new CryptoError('Secret key cannot be empty.');
 
   const parts = encryptedData.split(':');
-  if (parts.length !== 3) {
-    throw new CryptoError('Invalid encrypted data format.');
+  if (parts.length !== 2) {
+    // The C# implementation has a data format of `iv_string + base64_ciphertext`
+    // which is insecure and difficult to parse reliably. This implementation
+    // only supports the `base64(iv):base64(ciphertext)` format.
+    throw new CryptoError(
+      'Invalid encrypted data format. Expected format: iv_base64:ciphertext_base64'
+    );
   }
-  const [saltB64, ivB64, cipherB64] = parts;
-
-  const salt = new Uint8Array(base64ToArrayBuffer(saltB64));
-  const iv = new Uint8Array(base64ToArrayBuffer(ivB64));
-  const ciphertext = new Uint8Array(base64ToArrayBuffer(cipherB64));
-
-  const key = await getKey(secret, salt);
+  const [ivB64, cipherB64] = parts;
 
   try {
+    const key = await getSecretKey(secret);
+    const iv = new Uint8Array(base64ToArrayBuffer(ivB64));
+    const ciphertext = new Uint8Array(base64ToArrayBuffer(cipherB64));
+
     const decrypted = await window.crypto.subtle.decrypt(
       {
-        name: 'AES-GCM',
+        name: 'AES-CBC',
         iv: iv,
       },
       key,
@@ -135,8 +132,9 @@ export const decryptText = async (
 
     return dec.decode(decrypted);
   } catch (err) {
+    // This error is often thrown for incorrect keys or corrupted data.
     throw new CryptoError(
-      'Decryption failed. Check the secret key or data integrity.'
+      'Decryption failed. This is often caused by an incorrect secret key or corrupted data.'
     );
   }
 };

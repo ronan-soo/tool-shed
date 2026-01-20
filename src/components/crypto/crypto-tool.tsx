@@ -116,7 +116,10 @@ export function CryptoTool() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
+            <CardDescription>
+              {description} This tool now uses AES-CBC encryption to be
+              compatible with the .NET implementation.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid w-full gap-2">
@@ -133,7 +136,7 @@ export function CryptoTool() {
               />
             </div>
             <div className="grid w-full gap-2">
-              <Label htmlFor={`secret-${value}`}>Secret Key (Base64)</Label>
+              <Label htmlFor={`secret-${value}`}>Secret Key</Label>
               <Input
                 id={`secret-${value}`}
                 type="password"
@@ -141,6 +144,9 @@ export function CryptoTool() {
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
               />
+              <p className="text-sm text-muted-foreground">
+                Must be a 256-bit (32-byte) key, provided in Base64 format.
+              </p>
             </div>
             {error && (
               <Alert variant="destructive">
