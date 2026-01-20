@@ -11,16 +11,33 @@ import {
   SidebarMenuButton,
   SidebarInset,
   SidebarTrigger,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Cable, Shield, Wrench } from 'lucide-react';
+import { Home, Cable, Shield, Wrench, ChevronRight } from 'lucide-react';
 import React from 'react';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/pipelines', label: 'String Pipelines', icon: Cable },
-  { href: '/crypto', label: 'Cryptography', icon: Shield },
+  {
+    href: '/crypto',
+    label: 'Cryptography',
+    icon: Shield,
+    subItems: [
+      { href: '/crypto/encrypt-decrypt', label: 'Encrypt / Decrypt' },
+      { href: '/crypto/hasher', label: 'SHA-256 Hasher' },
+      { href: '/crypto/key-generator', label: 'Key Generator' },
+    ],
+  },
 ];
 
 export default function MainLayout({
@@ -35,19 +52,17 @@ export default function MainLayout({
       return 'String Pipelines';
     }
     if (pathname.startsWith('/crypto')) {
+      const cryptoItem = navItems.find((item) => item.href === '/crypto');
+      const subItem = cryptoItem?.subItems?.find(
+        (sub) => pathname === sub.href
+      );
+      if (subItem) return subItem.label;
       return 'Cryptography';
     }
     if (pathname === '/') {
       return 'Home';
     }
     return 'Tool Shed';
-  };
-
-  const isActive = (href: string) => {
-    if (href === '/') {
-      return pathname === '/';
-    }
-    return pathname.startsWith(href);
   };
 
   return (
@@ -75,16 +90,50 @@ export default function MainLayout({
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    tooltip={item.label}
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                  {item.subItems ? (
+                    <Collapsible defaultOpen={pathname.startsWith(item.href)}>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          isActive={pathname.startsWith(item.href)}
+                          tooltip={item.label}
+                          className="w-full justify-between"
+                        >
+                          <span className="flex items-center gap-2">
+                            <item.icon />
+                            <span>{item.label}</span>
+                          </span>
+                          <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-200 data-[state=open]:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {item.subItems.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.href}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={pathname === subItem.href}
+                              >
+                                <Link href={subItem.href}>
+                                  <span>{subItem.label}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ) : (
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === item.href}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
