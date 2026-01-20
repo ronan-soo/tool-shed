@@ -91,7 +91,7 @@ export default function MainLayout({
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   {item.subItems ? (
-                    <Collapsible defaultOpen={pathname.startsWith(item.href)}>
+                    <Collapsible defaultOpen={item.href === '/cryptography' || pathname.startsWith(item.href)}>
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton
                           isActive={pathname.startsWith(item.href)}
