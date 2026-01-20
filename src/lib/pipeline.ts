@@ -65,33 +65,47 @@ function formatXml(xml: string, options: any) {
   const indentChar = { '2s': '  ', '4s': '    ', tab: '\t' }[indent];
   
   let formatted = '';
-  letindentLevel = 0;
+  let indentLevel = 0;
   const xml_header = xml.match(/^<\?xml.*?\?>\s*/);
   xml = xml_header ? xml.substring(xml_header[0].length) : xml;
 
-  const nodes = xml.replace(/>\s*</g, '><').split(/(>)/g);
-  
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    if (node === '>') {
-      formatted += '>\n';
-      continue;
+  // Add a newline between tags
+  const reg = /(>)(<)(\/*)/g;
+  xml = xml.replace(reg, '$1\r\n$2$3');
+
+  // For each line, add indentation
+  xml.split('\r\n').forEach(function(node) {
+    let shouldIndent = true;
+    let trimmedNode = node.trim();
+
+    if (!trimmedNode) {
+      return;
     }
-    if (nodes[i+1] === '>') {
-        const nextNode = nodes[i+2] || '';
-        if (node.startsWith('</')) {
-            indentLevel--;
-            formatted += '  '.repeat(indentLevel > 0 ? indentLevel : 0).replace(/ /g, indentChar) + node;
-        } else if (node.endsWith('/>')) {
-            formatted += '  '.repeat(indentLevel > 0 ? indentLevel : 0).replace(/ /g, indentChar) + node;
-        } else {
-             formatted += '  '.repeat(indentLevel > 0 ? indentLevel : 0).replace(/ /g, indentChar) + node;
-             indentLevel++;
-        }
+
+    if (trimmedNode.match(/<\w[^>]*>.*<\/\w>/)) {
+      // Node has open and closing tags on the same line, like <tag>text</tag>
+      shouldIndent = false;
+    } else if (trimmedNode.match(/^<\/\w/)) {
+      // Node is a closing tag
+      if (indentLevel > 0) {
+        indentLevel--;
+      }
+    } else if (trimmedNode.match(/^<\w/) && trimmedNode.endsWith('/>')) {
+      // Node is a self-closing tag
+      shouldIndent = false;
     }
-  }
+
+    formatted += indentChar.repeat(indentLevel) + trimmedNode + '\r\n';
+
+    if (shouldIndent && trimmedNode.match(/^<\w/) && !trimmedNode.endsWith('/>')) {
+      // Node is an opening tag
+      indentLevel++;
+    }
+  });
+
   return (xml_header ? xml_header[0] : '') + formatted.trim();
 }
+
 
 function selectField(input: object, options: any): any {
   const { path = '' } = options;
