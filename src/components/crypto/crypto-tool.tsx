@@ -22,10 +22,106 @@ import {
   decryptText,
   CryptoError,
   arrayBufferToBase64,
+  hashSha256,
 } from '@/lib/crypto-helpers';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 type Tab = 'encrypt' | 'decrypt';
+
+function SecretHasher() {
+  const [secretToHash, setSecretToHash] = useState('');
+  const [hashedOutput, setHashedOutput] = useState('');
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleHash = async () => {
+    if (!secretToHash) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please enter a secret to hash.',
+      });
+      return;
+    }
+    setIsLoading(true);
+    setHashedOutput('');
+    try {
+      const hashed = await hashSha256(secretToHash);
+      setHashedOutput(hashed);
+    } catch (e) {
+      const errorMessage =
+        e instanceof Error ? e.message : 'An unknown error occurred.';
+      toast({
+        variant: 'destructive',
+        title: 'Hashing Error',
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (hashedOutput) {
+      navigator.clipboard.writeText(hashedOutput);
+      toast({
+        title: 'Copied!',
+        description: 'The hash has been copied to your clipboard.',
+      });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-headline">SHA-256 Hasher</CardTitle>
+        <CardDescription>
+          Create a SHA-256 hash from a string. The output is a hex-encoded
+          string. Useful for verifying data integrity.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid w-full gap-2">
+          <Label htmlFor="secret-to-hash">Input</Label>
+          <Input
+            id="secret-to-hash"
+            value={secretToHash}
+            onChange={(e) => setSecretToHash(e.target.value)}
+            placeholder="Enter text to hash..."
+          />
+        </div>
+
+        {hashedOutput && (
+          <div className="grid w-full gap-2">
+            <Label htmlFor="hashed-output">SHA-256 Hash (Hex)</Label>
+            <div className="relative">
+              <Input
+                id="hashed-output"
+                readOnly
+                value={hashedOutput}
+                className="font-code pr-10"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                onClick={copyToClipboard}
+                aria-label="Copy hash"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter>
+        <Button onClick={handleHash} disabled={isLoading}>
+          {isLoading ? 'Hashing...' : 'Hash Secret'}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
 
 function RandomKeyGenerator() {
   const [bits, setBits] = useState('256');
@@ -42,7 +138,9 @@ function RandomKeyGenerator() {
       return;
     }
     const byteLength = parseInt(bits, 10) / 8;
-    const randomBytes = window.crypto.getRandomValues(new Uint8Array(byteLength));
+    const randomBytes = window.crypto.getRandomValues(
+      new Uint8Array(byteLength)
+    );
     const base64Key = arrayBufferToBase64(randomBytes.buffer);
     setGeneratedKey(base64Key);
   };
@@ -197,6 +295,7 @@ export function CryptoTool() {
           buttonText="Decrypt"
         />
       </Tabs>
+      <SecretHasher />
       <RandomKeyGenerator />
     </div>
   );

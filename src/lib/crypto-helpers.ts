@@ -126,3 +126,19 @@ export const decryptText = async (
     );
   }
 };
+
+// Hashing function
+export const hashSha256 = async (text: string): Promise<string> => {
+  if (typeof window === 'undefined') {
+    throw new CryptoError('Web Crypto API is not available.');
+  }
+  if (!text) throw new CryptoError('Input text cannot be empty.');
+
+  const data = enc.encode(text);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+
+  // Convert ArrayBuffer to hex string
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+};
