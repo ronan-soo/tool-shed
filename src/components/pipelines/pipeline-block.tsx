@@ -128,7 +128,7 @@ export function PipelineBlock({
 
   return (
     <Card className={!block.enabled ? 'bg-muted/50' : ''}>
-      <CardHeader className="flex flex-row items-start justify-between gap-4 pb-4">
+      <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4 pb-4">
         <div className="flex items-start gap-4">
           <div className="bg-primary/10 text-primary p-3 rounded-lg">
             <Icon className="h-6 w-6" />

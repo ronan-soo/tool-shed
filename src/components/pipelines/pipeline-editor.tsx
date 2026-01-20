@@ -10,11 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import {
-  type Block,
-  type BlockType,
-  processPipeline,
-} from '@/lib/pipeline';
+import { type Block, type BlockType, processPipeline } from '@/lib/pipeline';
 import { PipelineBlock } from './pipeline-block';
 import {
   CaseSensitive,
@@ -23,31 +19,62 @@ import {
   Milestone,
   Link,
   Sigma,
-  PlusCircle,
   Trash2,
   ChevronDown,
   LogIn,
   LogOut,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+import { ScrollArea } from '../ui/scroll-area';
 
-const blockTypes: { type: BlockType; name: string; icon: React.ElementType }[] =
-  [
-    { type: 'case', name: 'Case Transform', icon: CaseSensitive },
-    { type: 'escape', name: 'Escape/Unescape', icon: Link },
-    { type: 'minify', name: 'Minify', icon: Sigma },
-    { type: 'json_parse', name: 'Parse JSON', icon: Braces },
-    { type: 'xml_parse', name: 'Format XML', icon: CodeXml },
-    { type: 'select_field', name: 'Select Field', icon: Milestone },
-    { type: 'stringify', name: 'Stringify', icon: Braces },
-  ];
+const blockTypes: {
+  type: BlockType;
+  name: string;
+  icon: React.ElementType;
+  description: string;
+}[] = [
+  {
+    type: 'case',
+    name: 'Case Transform',
+    icon: CaseSensitive,
+    description: 'Convert text to uppercase or lowercase.',
+  },
+  {
+    type: 'escape',
+    name: 'Escape/Unescape',
+    icon: Link,
+    description: 'Escape or unescape HTML or URI components.',
+  },
+  {
+    type: 'minify',
+    name: 'Minify',
+    icon: Sigma,
+    description: 'Remove extra whitespace from text or JSON.',
+  },
+  {
+    type: 'json_parse',
+    name: 'Parse JSON',
+    icon: Braces,
+    description: 'Convert a JSON string into an object.',
+  },
+  {
+    type: 'xml_parse',
+    name: 'Format XML',
+    icon: CodeXml,
+    description: 'Pretty-print an XML string with indentation.',
+  },
+  {
+    type: 'select_field',
+    name: 'Select Field',
+    icon: Milestone,
+    description: 'Extract a value from a JSON object using a path.',
+  },
+  {
+    type: 'stringify',
+    name: 'Stringify',
+    icon: Braces,
+    description: 'Convert a JSON object back into a string.',
+  },
+];
 
 export function PipelineEditor() {
   const [blocks, setBlocks] = useState<Block[]>([]);
@@ -65,11 +92,11 @@ export function PipelineEditor() {
       : processedBlocks.length === 0
       ? inputText
       : '';
-  
-  const finalOutputString = typeof finalOutput === 'string'
-    ? finalOutput
-    : JSON.stringify(finalOutput, null, 2);
 
+  const finalOutputString =
+    typeof finalOutput === 'string'
+      ? finalOutput
+      : JSON.stringify(finalOutput, null, 2);
 
   const handleAddBlock = (type: BlockType) => {
     const newBlock: Block = {
@@ -115,20 +142,28 @@ export function PipelineEditor() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={clearPipeline}
-            disabled={blocks.length === 0 && !inputText}
-          >
-            <Trash2 className="mr-2 h-4 w-4" /> Clear All
-          </Button>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start h-full">
+      <ScrollArea className="h-full lg:col-span-2">
+        <div className="space-y-4 pr-4 pb-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold font-headline">
+                Processing Pipeline
+              </h2>
+              <p className="text-muted-foreground">
+                Chain transformations to process your input string.
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={clearPipeline}
+              disabled={blocks.length === 0 && !inputText}
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Clear All
+            </Button>
+          </div>
 
-        <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="font-headline flex items-center gap-2">
@@ -166,41 +201,8 @@ export function PipelineEditor() {
             </React.Fragment>
           ))}
 
-          <div className="flex justify-center text-muted-foreground">
-            <ChevronDown className="h-8 w-8" />
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Card className="border-dashed hover:border-primary hover:bg-accent transition-colors cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex flex-col items-center justify-center text-center gap-2 text-muted-foreground">
-                    <PlusCircle className="h-10 w-10" />
-                    <p className="font-semibold mt-2">Add a new block</p>
-                    <p className="text-sm">
-                      Select a transformation to add to your pipeline.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64">
-              <DropdownMenuLabel>Choose a block to add</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {blockTypes.map(({ type, name, icon: Icon }) => (
-                <DropdownMenuItem
-                  key={type}
-                  onClick={() => handleAddBlock(type)}
-                >
-                  <Icon className="mr-2 h-4 w-4" />
-                  <span>{name}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {(inputText || blocks.length > 0) && (
-            <React.Fragment>
+            <>
               <div className="flex justify-center text-muted-foreground">
                 <ChevronDown className="h-8 w-8" />
               </div>
@@ -223,9 +225,41 @@ export function PipelineEditor() {
                   />
                 </CardContent>
               </Card>
-            </React.Fragment>
+            </>
           )}
         </div>
+      </ScrollArea>
+
+      <div className="lg:col-span-1 lg:sticky lg:top-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-headline">Transformations</CardTitle>
+            <CardDescription>
+              Click a transformation to add it to the pipeline.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {blockTypes.map(({ type, name, icon: Icon, description }) => (
+                <button
+                  key={type}
+                  onClick={() => handleAddBlock(type)}
+                  className="w-full text-left p-3 rounded-lg border hover:border-primary hover:bg-accent transition-colors flex items-start gap-4"
+                >
+                  <div className="p-2 bg-primary/10 text-primary rounded-md mt-1">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold">{name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {description}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
