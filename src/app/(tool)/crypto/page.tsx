@@ -1,5 +1,5 @@
-import { EncryptDecryptTool } from '@/components/crypto/crypto-tool';
+import { redirect } from 'next/navigation';
 
-export default function EncryptDecryptPage() {
-  return <EncryptDecryptTool />;
+export default function CryptoRootPage() {
+  redirect('/crypto/encrypt-decrypt');
 }

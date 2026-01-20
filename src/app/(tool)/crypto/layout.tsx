@@ -12,19 +12,12 @@ export default function CryptoLayout({
 }) {
   const pathname = usePathname();
 
-  const getActiveTab = () => {
-    if (pathname.startsWith('/crypto/hasher')) return '/crypto/hasher';
-    if (pathname.startsWith('/crypto/key-generator'))
-      return '/crypto/key-generator';
-    return '/crypto';
-  };
-
   return (
     <div className="flex h-full flex-col gap-4">
-      <Tabs value={getActiveTab()} className="w-full">
+      <Tabs value={pathname} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="/crypto" asChild>
-            <Link href="/crypto">Encrypt / Decrypt</Link>
+          <TabsTrigger value="/crypto/encrypt-decrypt" asChild>
+            <Link href="/crypto/encrypt-decrypt">Encrypt / Decrypt</Link>
           </TabsTrigger>
           <TabsTrigger value="/crypto/hasher" asChild>
             <Link href="/crypto/hasher">SHA-256 Hasher</Link>
