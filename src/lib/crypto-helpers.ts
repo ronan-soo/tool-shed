@@ -33,47 +33,41 @@ export const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
   return btoa(binary);
 };
 
-// Key derivation function
-const getSecretKey = (
-  password: string,
-  salt: Uint8Array
-): Promise<CryptoKey> => {
+// Key import function
+const getSecretKey = (secretB64: string): Promise<CryptoKey> => {
   if (typeof window === 'undefined') {
     throw new CryptoError('Web Crypto API is not available.');
   }
-  const passwordBuffer = enc.encode(password);
-  return window.crypto.subtle
-    .importKey('raw', passwordBuffer, { name: 'PBKDF2' }, false, ['deriveKey'])
-    .then((key) =>
-      window.crypto.subtle.deriveKey(
-        {
-          name: 'PBKDF2',
-          salt: salt,
-          iterations: 100000,
-          hash: 'SHA-256',
-        },
-        key,
-        { name: 'AES-GCM', length: 256 },
-        true,
-        ['encrypt', 'decrypt']
-      )
+  try {
+    const secretBytes = base64ToArrayBuffer(secretB64);
+    // AES-GCM supports 128, 192, 256 bit keys
+    if (![16, 24, 32].includes(secretBytes.byteLength)) {
+      throw new Error(); // Will be caught and wrapped
+    }
+    return window.crypto.subtle.importKey('raw', secretBytes, 'AES-GCM', true, [
+      'encrypt',
+      'decrypt',
+    ]);
+  } catch (e) {
+    throw new CryptoError(
+      'Invalid Secret Key. Please provide a 128, 192, or 256-bit key, encoded in Base64.'
     );
+  }
 };
 
 // Encrypt function
 export const encryptText = async (
   text: string,
-  secret: string
+  secretB64: string
 ): Promise<string> => {
   if (typeof window === 'undefined') {
     throw new CryptoError('Web Crypto API is not available.');
   }
   if (!text) throw new CryptoError('Input text cannot be empty.');
-  if (!secret) throw new CryptoError('Secret phrase cannot be empty.');
+  if (!secretB64) throw new CryptoError('Secret key cannot be empty.');
 
-  const salt = window.crypto.getRandomValues(new Uint8Array(16));
-  const iv = window.crypto.getRandomValues(new Uint8Array(12));
-  const key = await getSecretKey(secret, salt);
+  const iv = window.crypto.getRandomValues(new Uint8Array(12)); // 96-bits is recommended for GCM
+  const key = await getSecretKey(secretB64);
   const plaintext = enc.encode(text);
 
   const ciphertext = await window.crypto.subtle.encrypt(
@@ -85,38 +79,36 @@ export const encryptText = async (
     plaintext
   );
 
-  const saltB64 = arrayBufferToBase64(salt);
   const ivB64 = arrayBufferToBase64(iv);
   const cipherB64 = arrayBufferToBase64(ciphertext);
 
-  return `${saltB64}:${ivB64}:${cipherB64}`;
+  return `${ivB64}:${cipherB64}`;
 };
 
 // Decrypt function
 export const decryptText = async (
   encryptedData: string,
-  secret: string
+  secretB64: string
 ): Promise<string> => {
   if (typeof window === 'undefined') {
     throw new CryptoError('Web Crypto API is not available.');
   }
   if (!encryptedData) throw new CryptoError('Encrypted data cannot be empty.');
-  if (!secret) throw new CryptoError('Secret phrase cannot be empty.');
+  if (!secretB64) throw new CryptoError('Secret key cannot be empty.');
 
   const parts = encryptedData.split(':');
-  if (parts.length !== 3) {
+  if (parts.length !== 2) {
     throw new CryptoError(
-      'Invalid encrypted data format. Expected salt:iv:ciphertext.'
+      'Invalid encrypted data format. Expected iv:ciphertext.'
     );
   }
-  const [saltB64, ivB64, cipherB64] = parts;
+  const [ivB64, cipherB64] = parts;
 
   try {
-    const salt = new Uint8Array(base64ToArrayBuffer(saltB64));
     const iv = new Uint8Array(base64ToArrayBuffer(ivB64));
     const ciphertext = new Uint8Array(base64ToArrayBuffer(cipherB64));
 
-    const key = await getSecretKey(secret, salt);
+    const key = await getSecretKey(secretB64);
 
     const decrypted = await window.crypto.subtle.decrypt(
       {
@@ -130,7 +122,7 @@ export const decryptText = async (
     return dec.decode(decrypted);
   } catch (err) {
     throw new CryptoError(
-      'Decryption failed. This is often caused by an incorrect secret phrase or corrupted data.'
+      'Decryption failed. This is often caused by an incorrect secret key or corrupted data.'
     );
   }
 };

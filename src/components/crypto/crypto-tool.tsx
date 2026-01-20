@@ -130,7 +130,7 @@ export function CryptoTool() {
 
   const handleProcess = async () => {
     if (!inputText || !secret) {
-      setError('Please provide both input text and a secret phrase.');
+      setError('Please provide both input text and a secret key.');
       return;
     }
     setError('');
@@ -233,16 +233,17 @@ export function CryptoTool() {
               />
             </div>
             <div className="grid w-full gap-2">
-              <Label htmlFor={`secret-${value}`}>Secret Phrase</Label>
+              <Label htmlFor={`secret-${value}`}>Secret Key (Base64)</Label>
               <Input
                 id={`secret-${value}`}
                 type="text"
-                placeholder="Enter your secret phrase..."
+                placeholder="Enter your Base64 encoded secret key..."
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
               />
               <p className="text-sm text-muted-foreground">
-                Your secret phrase is used to derive the encryption key.
+                The secret key must be a Base64 encoded string representing 128,
+                192, or 256 bits of data. Use the generator below to create one.
               </p>
             </div>
             {error && (
