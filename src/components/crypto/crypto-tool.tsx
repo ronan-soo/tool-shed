@@ -36,7 +36,7 @@ export function CryptoTool() {
 
   const handleProcess = async () => {
     if (!inputText || !secret) {
-      setError('Please provide both input text and a secret phrase.');
+      setError('Please provide both input text and a secret key.');
       return;
     }
     setError('');
@@ -133,11 +133,11 @@ export function CryptoTool() {
               />
             </div>
             <div className="grid w-full gap-2">
-              <Label htmlFor={`secret-${value}`}>Secret Phrase</Label>
+              <Label htmlFor={`secret-${value}`}>Secret Key (Base64)</Label>
               <Input
                 id={`secret-${value}`}
                 type="password"
-                placeholder="Enter your secret phrase..."
+                placeholder="Enter your Base64 encoded secret key..."
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
               />

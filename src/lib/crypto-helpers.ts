@@ -38,9 +38,17 @@ const getKey = async (secret: string, salt: Uint8Array): Promise<CryptoKey> => {
   if (typeof window === 'undefined') {
     throw new CryptoError('Web Crypto API is not available.');
   }
+
+  let secretRaw: ArrayBuffer;
+  try {
+    secretRaw = base64ToArrayBuffer(secret);
+  } catch (e) {
+    throw new CryptoError('Secret key is not a valid Base64 string.');
+  }
+
   const secretKey = await window.crypto.subtle.importKey(
     'raw',
-    enc.encode(secret),
+    secretRaw,
     'PBKDF2',
     false,
     ['deriveKey']
@@ -69,7 +77,7 @@ export const encryptText = async (
     throw new CryptoError('Web Crypto API is not available.');
   }
   if (!text) throw new CryptoError('Input text cannot be empty.');
-  if (!secret) throw new CryptoError('Secret phrase cannot be empty.');
+  if (!secret) throw new CryptoError('Secret key cannot be empty.');
 
   const salt = window.crypto.getRandomValues(new Uint8Array(16));
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
@@ -101,7 +109,7 @@ export const decryptText = async (
     throw new CryptoError('Web Crypto API is not available.');
   }
   if (!encryptedData) throw new CryptoError('Encrypted data cannot be empty.');
-  if (!secret) throw new CryptoError('Secret phrase cannot be empty.');
+  if (!secret) throw new CryptoError('Secret key cannot be empty.');
 
   const parts = encryptedData.split(':');
   if (parts.length !== 3) {
@@ -128,7 +136,7 @@ export const decryptText = async (
     return dec.decode(decrypted);
   } catch (err) {
     throw new CryptoError(
-      'Decryption failed. Check the secret phrase or data integrity.'
+      'Decryption failed. Check the secret key or data integrity.'
     );
   }
 };
