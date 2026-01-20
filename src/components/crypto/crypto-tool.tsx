@@ -130,7 +130,7 @@ export function CryptoTool() {
 
   const handleProcess = async () => {
     if (!inputText || !secret) {
-      setError('Please provide both input text and a secret key.');
+      setError('Please provide both input text and a secret phrase.');
       return;
     }
     setError('');
@@ -217,10 +217,7 @@ export function CryptoTool() {
         <Card className="flex h-full w-full flex-col">
           <CardHeader>
             <CardTitle className="font-headline">{title}</CardTitle>
-            <CardDescription>
-              {description} This tool now uses AES-CBC encryption to be
-              compatible with the .NET implementation.
-            </CardDescription>
+            <CardDescription>{description}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col gap-6">
             <div className="flex flex-1 flex-col gap-2">
@@ -236,16 +233,16 @@ export function CryptoTool() {
               />
             </div>
             <div className="grid w-full gap-2">
-              <Label htmlFor={`secret-${value}`}>Secret Key</Label>
+              <Label htmlFor={`secret-${value}`}>Secret Phrase</Label>
               <Input
                 id={`secret-${value}`}
-                type="password"
-                placeholder="Enter your Base64 encoded secret key..."
+                type="text"
+                placeholder="Enter your secret phrase..."
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
               />
               <p className="text-sm text-muted-foreground">
-                Must be a 256-bit (32-byte) key, provided in Base64 format.
+                Your secret phrase is used to derive the encryption key.
               </p>
             </div>
             {error && (

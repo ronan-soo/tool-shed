@@ -108,7 +108,7 @@ export function PipelineEditor() {
                 className="justify-start h-auto"
               >
                 <div className="flex items-center gap-2 p-1">
-                  <Icon className="h-5 w-5 text-accent" />
+                  <Icon className="h-5 w-5 text-primary" />
                   <span className="text-sm">{name}</span>
                 </div>
               </Button>
