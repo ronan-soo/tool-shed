@@ -21,6 +21,7 @@ import {
   Link,
   Sigma,
   AlertTriangle,
+  Fingerprint,
 } from 'lucide-react';
 import type { Block, BlockType } from '@/lib/pipeline';
 import { CaseTransformBlock } from './blocks/case-transform-block';
@@ -32,6 +33,7 @@ import { SelectFieldBlock } from './blocks/select-field-block';
 import { StringifyBlock } from './blocks/stringify-block';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
+import { GuidFormatBlock } from './blocks/guid-format-block';
 
 const blockMeta: Record<
   BlockType,
@@ -44,6 +46,7 @@ const blockMeta: Record<
   xml_parse: { name: 'Format XML', icon: CodeXml },
   select_field: { name: 'Select Field', icon: Milestone },
   stringify: { name: 'Stringify', icon: Braces },
+  guid_format: { name: 'GUID Format', icon: Fingerprint },
 };
 
 type PipelineBlockProps = {
@@ -116,6 +119,13 @@ export function PipelineBlock({
         );
       case 'stringify':
         return <StringifyBlock />;
+      case 'guid_format':
+        return (
+          <GuidFormatBlock
+            options={block.options}
+            onOptionsChange={handleOptionsChange}
+          />
+        );
       default:
         return null;
     }

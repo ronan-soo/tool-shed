@@ -23,6 +23,7 @@ import {
   ChevronDown,
   LogIn,
   LogOut,
+  Fingerprint,
 } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 
@@ -73,6 +74,12 @@ const blockTypes: {
     name: 'Stringify',
     icon: Braces,
     description: 'Convert a JSON object back into a string.',
+  },
+  {
+    type: 'guid_format',
+    name: 'GUID Format',
+    icon: Fingerprint,
+    description: 'Convert GUIDs between different string formats.',
   },
 ];
 

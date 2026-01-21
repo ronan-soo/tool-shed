@@ -5,7 +5,8 @@ export type BlockType =
   | 'json_parse'
   | 'xml_parse'
   | 'select_field'
-  | 'stringify';
+  | 'stringify'
+  | 'guid_format';
 
 export interface Block {
   id: string;
@@ -121,6 +122,26 @@ function stringify(input: object): string {
   return JSON.stringify(input, null, 2);
 }
 
+function transformGuidFormat(input: string, options: any): string {
+  const { format = 'hyphen' } = options;
+  // Remove hyphens, braces, and any whitespace
+  const hex = input.replace(/[\{\}\-\s]/g, '');
+
+  if (!/^[0-9a-fA-F]{32}$/.test(hex)) {
+    throw new Error('Input does not appear to be a valid 32-character hex GUID.');
+  }
+
+  switch (format) {
+    case 'no-hyphen':
+      return hex;
+    case 'braces':
+      return `{${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}}`;
+    case 'hyphen':
+    default:
+      return `${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}`;
+  }
+}
+
 // Main pipeline processor
 export function processPipeline(
   initialInput: string,
@@ -167,6 +188,10 @@ export function processPipeline(
         case 'stringify':
           if(typeof currentInput !== 'object' || currentInput === null) throw new Error('Input must be a JSON object.');
           output = stringify(currentInput);
+          break;
+        case 'guid_format':
+          if (typeof currentInput !== 'string') throw new Error('Input must be a string.');
+          output = transformGuidFormat(currentInput, block.options);
           break;
         default:
           throw new Error('Unknown block type');
