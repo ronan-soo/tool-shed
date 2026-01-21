@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -17,15 +17,38 @@ import {
   CodeXml,
   Braces,
   Milestone,
-  Link,
+  Link as LinkIcon,
   Sigma,
   Trash2,
   ChevronDown,
   LogIn,
   LogOut,
   Fingerprint,
+  Bookmark,
 } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 const blockTypes: {
   type: BlockType;
@@ -42,7 +65,7 @@ const blockTypes: {
   {
     type: 'escape',
     name: 'Escape/Unescape',
-    icon: Link,
+    icon: LinkIcon,
     description: 'Escape or unescape HTML or URI components.',
   },
   {
@@ -84,8 +107,49 @@ const blockTypes: {
 ];
 
 export function PipelineEditor() {
+  type SavedPipeline = {
+    name: string;
+    blocks: Block[];
+    inputText: string;
+  };
+
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [inputText, setInputText] = useState('');
+  const [savedPipelines, setSavedPipelines] = useState<SavedPipeline[]>([]);
+  const [pipelineName, setPipelineName] = useState('');
+  const [isSaveAlertOpen, setIsSaveAlertOpen] = useState(false);
+  const { toast } = useToast();
+
+  // Load pipelines from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('string-pipelines');
+      if (saved) {
+        setSavedPipelines(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Failed to load pipelines from localStorage', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error loading saved pipelines',
+        description: 'Your saved pipelines data might be corrupted.',
+      });
+    }
+  }, [toast]);
+
+  // Function to update localStorage
+  const updateLocalStorage = (pipelines: SavedPipeline[]) => {
+    try {
+      localStorage.setItem('string-pipelines', JSON.stringify(pipelines));
+    } catch (error) {
+      console.error('Failed to save pipelines to localStorage', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error saving pipeline',
+        description: 'Could not save pipeline to local storage.',
+      });
+    }
+  };
 
   const processedBlocks = useMemo(
     () => processPipeline(inputText, blocks),
@@ -104,6 +168,64 @@ export function PipelineEditor() {
     typeof finalOutput === 'string'
       ? finalOutput
       : JSON.stringify(finalOutput, null, 2);
+
+  const handleSavePipeline = () => {
+    if (!pipelineName) {
+      toast({
+        variant: 'destructive',
+        title: 'Validation Error',
+        description: 'Please enter a name for the pipeline.',
+      });
+      return;
+    }
+
+    const newPipelines = [...savedPipelines];
+    const existingIndex = newPipelines.findIndex((p) => p.name === pipelineName);
+    const pipelineData = { name: pipelineName, blocks, inputText };
+
+    if (existingIndex > -1) {
+      // Update existing pipeline
+      newPipelines[existingIndex] = pipelineData;
+    } else {
+      // Add new pipeline
+      newPipelines.push(pipelineData);
+    }
+
+    setSavedPipelines(newPipelines);
+    updateLocalStorage(newPipelines);
+    toast({
+      title: 'Pipeline Saved',
+      description: `Pipeline "${pipelineName}" has been saved.`,
+    });
+    setPipelineName('');
+    setIsSaveAlertOpen(false);
+  };
+
+  const handleLoadPipeline = useCallback(
+    (name: string) => {
+      const pipeline = savedPipelines.find((p) => p.name === name);
+      if (pipeline) {
+        setBlocks(pipeline.blocks);
+        setInputText(pipeline.inputText);
+        toast({
+          title: 'Pipeline Loaded',
+          description: `Pipeline "${name}" has been loaded.`,
+        });
+      }
+    },
+    [savedPipelines, toast]
+  );
+
+  const handleDeletePipeline = (name: string) => {
+    const newPipelines = savedPipelines.filter((p) => p.name !== name);
+    setSavedPipelines(newPipelines);
+    updateLocalStorage(newPipelines);
+    toast({
+      variant: 'destructive',
+      title: 'Pipeline Deleted',
+      description: `Pipeline "${name}" has been deleted.`,
+    });
+  };
 
   const handleAddBlock = (type: BlockType) => {
     const newBlock: Block = {
@@ -152,7 +274,7 @@ export function PipelineEditor() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start h-full">
       <ScrollArea className="h-full lg:col-span-2">
         <div className="space-y-4 pr-4 pb-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div>
               <h2 className="text-2xl font-bold font-headline">
                 Processing Pipeline
@@ -161,14 +283,96 @@ export function PipelineEditor() {
                 Chain transformations to process your input string.
               </p>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={clearPipeline}
-              disabled={blocks.length === 0 && !inputText}
-            >
-              <Trash2 className="mr-2 h-4 w-4" /> Clear All
-            </Button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Bookmark className="mr-2 h-4 w-4" />
+                    Saved Pipelines
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>Load a Pipeline</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {savedPipelines.length === 0 ? (
+                    <p className="px-2 py-1.5 text-sm text-muted-foreground">
+                      No saved pipelines.
+                    </p>
+                  ) : (
+                    savedPipelines.map((pipeline) => (
+                      <DropdownMenuItem
+                        key={pipeline.name}
+                        onSelect={(e) => e.preventDefault()}
+                        className="flex items-center justify-between"
+                      >
+                        <button
+                          onClick={() => handleLoadPipeline(pipeline.name)}
+                          className="flex-1 text-left pr-2"
+                        >
+                          {pipeline.name}
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          onClick={() => handleDeletePipeline(pipeline.name)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <AlertDialog
+                open={isSaveAlertOpen}
+                onOpenChange={setIsSaveAlertOpen}
+              >
+                <AlertDialogTrigger asChild>
+                  <Button>
+                    <Bookmark className="mr-2 h-4 w-4" /> Save
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Save Pipeline</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Enter a name for your current pipeline to save it for
+                      later use. If the name already exists, it will be
+                      overwritten.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="py-4">
+                    <Label htmlFor="pipeline-name" className="sr-only">
+                      Pipeline Name
+                    </Label>
+                    <Input
+                      id="pipeline-name"
+                      value={pipelineName}
+                      onChange={(e) => setPipelineName(e.target.value)}
+                      placeholder="e.g., My JSON Parser"
+                    />
+                  </div>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleSavePipeline}>
+                      Save
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={clearPipeline}
+                disabled={blocks.length === 0 && !inputText}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Clear All
+              </Button>
+            </div>
           </div>
 
           <Card>
