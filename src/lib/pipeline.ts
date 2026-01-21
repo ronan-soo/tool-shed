@@ -112,7 +112,7 @@ function selectField(input: object, options: any): any {
   const { path = '' } = options;
   if (!path) throw new Error('Path is not specified.');
   // Simple path resolver, handles dot notation and array access
-  return path.split(/[.[\]]+/).filter(Boolean).reduce((obj: any, key: string) => {
+  return path.split(/[.\[\]]+/).filter(Boolean).reduce((obj: any, key: string) => {
     if (obj === null || obj === undefined) return undefined;
     return obj[key];
   }, input);
@@ -124,15 +124,15 @@ function stringify(input: object): string {
 
 function transformGuidFormat(input: string, options: any): string {
   const { format = 'hyphen' } = options;
-  // Remove hyphens, braces, and any whitespace
-  const hex = input.replace(/[\{\}\-\s]/g, '');
+  // Remove any non-hexadecimal characters.
+  const hex = input.replace(/[^0-9a-fA-F]/g, '');
 
-  if (!/^[0-9a-fA-F]{32}$/.test(hex)) {
-    throw new Error('Input does not appear to be a valid 32-character hex GUID.');
+  if (hex.length !== 32) {
+    throw new Error(`Input must contain exactly 32 hexadecimal characters, but found ${hex.length}.`);
   }
 
   switch (format) {
-    case 'no-hyphen':
+    case 'no-hen':
       return hex;
     case 'braces':
       return `{${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}}`;
