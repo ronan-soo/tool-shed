@@ -6,7 +6,26 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import Link from 'next/link';
-import { Cable, Shield, Wrench } from 'lucide-react';
+import { Cable, Shield } from 'lucide-react';
+
+const ClownIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <path d="M8 14.5c1.5 2.5 6.5 2.5 8 0" />
+    <circle cx="9" cy="10" r="0.5" fill="currentColor" />
+    <circle cx="15" cy="10" r="0.5" fill="currentColor" />
+    <circle cx="12" cy="12" r="2" fill="currentColor" />
+  </svg>
+);
+
 
 export default function HomePage() {
   return (
@@ -14,7 +33,7 @@ export default function HomePage() {
       <main className="flex-1 container mx-auto flex items-center justify-center p-4">
         <div>
           <div className="mb-12 text-center">
-            <Wrench className="mx-auto h-16 w-16 text-primary mb-4" />
+            <ClownIcon className="mx-auto h-16 w-16 text-primary mb-4" />
             <h1 className="text-4xl font-bold font-headline tracking-tight sm:text-5xl lg:text-6xl">
               Welcome to Tool Shed
             </h1>
