@@ -31,8 +31,8 @@ import { ParseJsonBlock } from './blocks/parse-json-block';
 import { ParseXmlBlock } from './blocks/parse-xml-block';
 import { SelectFieldBlock } from './blocks/select-field-block';
 import { StringifyBlock } from './blocks/stringify-block';
-import { Textarea } from '../ui/textarea';
-import { Label } from '../ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { GuidFormatBlock } from './blocks/guid-format-block';
 
 const blockMeta: Record<

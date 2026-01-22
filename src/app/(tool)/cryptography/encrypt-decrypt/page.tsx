@@ -1,4 +1,4 @@
-import { EncryptDecryptTool } from '@/components/crypto/crypto-tool';
+import { EncryptDecryptTool } from '../components/crypto-tool';
 
 export default function EncryptDecryptPage() {
   return <EncryptDecryptTool />;

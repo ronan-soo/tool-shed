@@ -1,4 +1,4 @@
-import { HasherTool } from '@/components/crypto/crypto-tool';
+import { HasherTool } from '../components/crypto-tool';
 
 export default function HasherPage() {
   return <HasherTool />;

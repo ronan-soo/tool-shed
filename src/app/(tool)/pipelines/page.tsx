@@ -1,4 +1,4 @@
-import { PipelineEditor } from '@/components/pipelines/pipeline-editor';
+import { PipelineEditor } from './components/pipeline-editor';
 
 export default function PipelinesPage() {
   return (
