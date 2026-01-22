@@ -52,6 +52,7 @@ export default function MainLayout({
       return 'String Pipelines';
     }
     if (pathname.startsWith('/cryptography')) {
+      if (pathname.endsWith('/disclaimer')) return 'Disclaimer';
       const cryptoItem = navItems.find((item) => item.href === '/cryptography');
       const subItem = cryptoItem?.subItems?.find(
         (sub) => pathname === sub.href
@@ -137,13 +138,23 @@ export default function MainLayout({
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-            <SidebarTrigger />
-            <h1 className="text-lg font-semibold md:text-xl font-headline">
-              {getPageTitle()}
-            </h1>
-          </header>
-          <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
+          <div className="flex flex-col min-h-svh">
+            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
+              <SidebarTrigger />
+              <h1 className="text-lg font-semibold md:text-xl font-headline">
+                {getPageTitle()}
+              </h1>
+            </header>
+            <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
+            <footer className="mt-auto border-t bg-background/80 px-6 py-4">
+              <div className="container mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-sm text-muted-foreground sm:justify-between">
+                <p>&copy; {new Date().getFullYear()} Tool Shed. All Rights Reserved.</p>
+                <Link href="/disclaimer" className="hover:text-primary transition-colors">
+                  Disclaimer & Policy
+                </Link>
+              </div>
+            </footer>
+          </div>
         </SidebarInset>
       </div>
     </SidebarProvider>
