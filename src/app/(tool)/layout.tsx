@@ -59,9 +59,6 @@ export default function MainLayout({
       if (subItem) return subItem.label;
       return 'Cryptography';
     }
-    if (pathname === '/') {
-      return 'Home';
-    }
     return 'Tool Shed';
   };
 
