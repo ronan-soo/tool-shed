@@ -105,7 +105,8 @@ export const encryptText = async (
 // Decrypt function
 export const decryptText = async (
   encryptedData: string,
-  secretPhrase: string
+  secretPhrase: string,
+  components?: { salt?: string; iv?: string }
 ): Promise<string> => {
   if (typeof window === 'undefined') {
     throw new CryptoError('Web Crypto API is not available.');
@@ -113,13 +114,34 @@ export const decryptText = async (
   if (!encryptedData) throw new CryptoError('Encrypted data cannot be empty.');
   if (!secretPhrase) throw new CryptoError('Secret phrase cannot be empty.');
 
-  const parts = encryptedData.split(':');
-  if (parts.length !== 3) {
+  let saltB64: string, ivB64: string, cipherB64: string;
+
+  const providedSalt = components?.salt?.trim();
+  const providedIv = components?.iv?.trim();
+
+  if (providedSalt && providedIv) {
+    saltB64 = providedSalt;
+    ivB64 = providedIv;
+    cipherB64 = encryptedData;
+  } else if (!providedSalt && !providedIv) {
+    const parts = encryptedData.split(':');
+    if (parts.length !== 3) {
+      throw new CryptoError(
+        'Invalid encrypted data. Expected format salt:iv:ciphertext, or provide both Salt and IV fields.'
+      );
+    }
+    [saltB64, ivB64, cipherB64] = parts;
+  } else {
     throw new CryptoError(
-      'Invalid encrypted data format. Expected salt:iv:ciphertext.'
+      'To decrypt with separate components, both Salt and IV must be provided.'
     );
   }
-  const [saltB64, ivB64, cipherB64] = parts;
+
+  if (!saltB64 || !ivB64 || !cipherB64) {
+    throw new CryptoError(
+      'Missing one or more required components for decryption (Ciphertext, Salt, IV).'
+    );
+  }
 
   try {
     const salt = new Uint8Array(base64ToArrayBuffer(saltB64));
@@ -137,7 +159,7 @@ export const decryptText = async (
     return dec.decode(decrypted);
   } catch (err) {
     throw new CryptoError(
-      'Decryption failed. This is often caused by an incorrect secret phrase or corrupted data.'
+      'Decryption failed. This is often caused by an incorrect secret phrase, salt, IV, or corrupted data.'
     );
   }
 };
