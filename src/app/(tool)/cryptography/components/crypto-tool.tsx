@@ -264,7 +264,7 @@ export function HasherTool() {
   };
 
   return (
-    <Card>
+    <Card className="flex flex-1 flex-col">
       <CardHeader>
         <CardTitle className="font-headline">SHA-256 Hasher</CardTitle>
         <CardDescription>
@@ -272,7 +272,7 @@ export function HasherTool() {
           string. Useful for verifying data integrity.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="flex-1 space-y-6">
         <div className="grid w-full gap-2">
           <Label htmlFor="secret-to-hash">Input</Label>
           <Input
@@ -350,7 +350,7 @@ export function KeyGeneratorTool() {
   };
 
   return (
-    <Card>
+    <Card className="flex flex-1 flex-col">
       <CardHeader>
         <CardTitle className="font-headline">Random Key Generator</CardTitle>
         <CardDescription>
@@ -358,7 +358,7 @@ export function KeyGeneratorTool() {
           is different from a secret phrase.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="flex-1 space-y-6">
         <div className="space-y-2">
           <Label>Key Size</Label>
           <RadioGroup

@@ -12,7 +12,7 @@ export default function CryptoLayout({
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <div className="flex-1">{children}</div>
+      <div className="flex flex-1">{children}</div>
     </div>
   );
 }
