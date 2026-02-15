@@ -50,7 +50,7 @@ export function CookieBanner() {
           <Cookie className="h-6 w-6 flex-shrink-0 mt-1" />
           <p className="text-sm">
             We use local storage to enhance your experience, remember your preferences, and for the functionality of saved pipelines. By continuing to use this site, you agree to our use of local storage. See our{' '}
-            <Link href="/tool/disclaimer" className="font-bold underline hover:text-primary">
+            <Link href="/disclaimer" className="font-bold underline hover:text-primary">
               Disclaimer & Policy
             </Link>
             .

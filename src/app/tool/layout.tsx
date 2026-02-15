@@ -65,20 +65,20 @@ export default function MainLayout({
   const pathname = usePathname();
 
   const getPageTitle = () => {
-    if (pathname.startsWith('/tool/pipelines')) {
-      return 'String Pipelines';
+    const currentRootItem = navItems.find(
+      (item) => item.href !== '/' && pathname.startsWith(item.href)
+    );
+
+    if (currentRootItem) {
+      if (currentRootItem.subItems) {
+        const subItem = currentRootItem.subItems.find(
+          (sub) => pathname === sub.href
+        );
+        if (subItem) return subItem.label;
+      }
+      return currentRootItem.label;
     }
-    if (pathname.startsWith('/tool/cryptography')) {
-      const cryptoItem = navItems.find((item) => item.href === '/tool/cryptography');
-      const subItem = cryptoItem?.subItems?.find(
-        (sub) => pathname === sub.href
-      );
-      if (subItem) return subItem.label;
-      return 'Cryptography';
-    }
-    if (pathname === '/tool/disclaimer') {
-      return 'Disclaimer';
-    }
+
     return 'Tool Shed';
   };
 
@@ -168,7 +168,7 @@ export default function MainLayout({
             <footer className="mt-auto border-t bg-background/80 px-6 py-4">
               <div className="container mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-sm text-muted-foreground sm:justify-between">
                 <p>&copy; {new Date().getFullYear()} Tool Shed. All Rights Reserved.</p>
-                <Link href="/tool/disclaimer" className="hover:text-primary transition-colors">
+                <Link href="/disclaimer" className="hover:text-primary transition-colors">
                   Disclaimer & Policy
                 </Link>
               </div>
