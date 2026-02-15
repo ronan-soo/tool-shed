@@ -1,6 +1,7 @@
+import { redirect } from 'next/navigation';
 
 export default function ToolRootPage() {
-  // This page is intentionally left blank to resolve a build issue.
-  // The main landing page is defined in `src/app/page.tsx`.
-  return null;
+  // The main landing page is now at the root `/`.
+  // Redirect any requests that land at the old tool root page.
+  redirect('/');
 }
