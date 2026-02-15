@@ -43,7 +43,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Link href="/pipelines" className="flex">
+            <Link href="/tool/pipelines" className="flex">
               <Card className="hover:border-primary hover:shadow-lg transition-all w-full flex flex-col">
                 <CardHeader>
                   <div className="flex items-center gap-4">
@@ -63,7 +63,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/cryptography" className="flex">
+            <Link href="/tool/cryptography" className="flex">
               <Card className="hover:border-primary hover:shadow-lg transition-all w-full flex flex-col">
                 <CardHeader>
                   <div className="flex items-center gap-4">
@@ -89,7 +89,7 @@ export default function HomePage() {
       <footer className="mt-auto border-t bg-background/80 px-6 py-4">
         <div className="container mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-sm text-muted-foreground sm:justify-between">
           <p>&copy; {new Date().getFullYear()} Tool Shed. All Rights Reserved.</p>
-          <Link href="/disclaimer" className="hover:text-primary transition-colors">
+          <Link href="/tool/disclaimer" className="hover:text-primary transition-colors">
             Disclaimer & Policy
           </Link>
         </div>
