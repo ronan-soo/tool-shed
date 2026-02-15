@@ -1,7 +1,6 @@
-import { redirect } from 'next/navigation';
+// This file is intentionally left blank to resolve a build issue
+// caused by a conflicting route.
 
-export default function ToolRootPage() {
-  // The main landing page is now at the root `/`.
-  // Redirect any requests that land at the old tool root page.
-  redirect('/');
+export default function DeprecatedToolRootPage() {
+  return null;
 }
