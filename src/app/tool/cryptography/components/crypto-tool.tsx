@@ -37,8 +37,6 @@ export function EncryptDecryptTool() {
   const [outputText, setOutputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [salt, setSalt] = useState('');
-  const [iv, setIv] = useState('');
   const { toast } = useToast();
 
   const handleProcess = async () => {
@@ -55,7 +53,7 @@ export function EncryptDecryptTool() {
         const encrypted = await encryptText(inputText, secret);
         setOutputText(encrypted);
       } else {
-        const decrypted = await decryptText(inputText, secret, { salt, iv });
+        const decrypted = await decryptText(inputText, secret);
         setOutputText(decrypted);
       }
     } catch (e) {
@@ -83,8 +81,6 @@ export function EncryptDecryptTool() {
     setOutputText('');
     setError('');
     setSecret('');
-    setSalt('');
-    setIv('');
   };
 
   function EncryptDecryptTabContent({
@@ -115,7 +111,7 @@ export function EncryptDecryptTool() {
                 placeholder={
                   value === 'encrypt'
                     ? 'Enter text here...'
-                    : 'Enter combined data (salt:iv:ciphertext) or just ciphertext if providing Salt/IV below.'
+                    : 'Enter combined data (salt:iv:ciphertext)'
                 }
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
@@ -136,33 +132,6 @@ export function EncryptDecryptTool() {
                 remember it!
               </p>
             </div>
-
-            {value === 'decrypt' && (
-              <>
-                <div className="grid w-full gap-2">
-                  <Label htmlFor="salt-decrypt">Salt (Base64, Optional)</Label>
-                  <Input
-                    id="salt-decrypt"
-                    value={salt}
-                    onChange={(e) => setSalt(e.target.value)}
-                    placeholder="Salt from a separate source"
-                  />
-                </div>
-                <div className="grid w-full gap-2">
-                  <Label htmlFor="iv-decrypt">IV (Base64, Optional)</Label>
-                  <Input
-                    id="iv-decrypt"
-                    value={iv}
-                    onChange={(e) => setIv(e.target.value)}
-                    placeholder="IV from a separate source"
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground -mt-4">
-                  If Salt and IV are provided, the 'Encrypted Data' field should
-                  contain only the ciphertext.
-                </p>
-              </>
-            )}
 
             {error && (
               <Alert variant="destructive">
