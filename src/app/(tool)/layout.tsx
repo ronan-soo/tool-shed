@@ -27,15 +27,15 @@ import { ClownIcon } from '@/components/icons';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
-  { href: '/tool/pipelines', label: 'String Pipelines', icon: Cable },
+  { href: '/pipelines', label: 'String Pipelines', icon: Cable },
   {
-    href: '/tool/cryptography',
+    href: '/cryptography',
     label: 'Cryptography',
     icon: Shield,
     subItems: [
-      { href: '/tool/cryptography/encrypt-decrypt', label: 'Encrypt / Decrypt' },
-      { href: '/tool/cryptography/hasher', label: 'SHA-256 Hasher' },
-      { href: '/tool/cryptography/key-generator', label: 'Key Generator' },
+      { href: '/cryptography/encrypt-decrypt', label: 'Encrypt / Decrypt' },
+      { href: '/cryptography/hasher', label: 'SHA-256 Hasher' },
+      { href: '/cryptography/key-generator', label: 'Key Generator' },
     ],
   },
 ];
